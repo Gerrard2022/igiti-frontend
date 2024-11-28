@@ -6,30 +6,6 @@ import { Category } from "@/types";
 const FooterBar = async () => {
   const categories: Category[] = await getCategories();
 
-  const helpLinks = [
-    "SALE FAQ",
-    "Store locator",
-    "30 day returns policy",
-    "Claims",
-    "Delivery times",
-    "Types of payment",
-    "Size Guide",
-    "Help and Contact",
-  ];
-  const aboutLinks = [
-    "About us",
-    "Our commitments",
-    "Career",
-    "Pressroom",
-    "Newsletter",
-  ];
-  const termsLinks = [
-    "Privacy Policy",
-    "Terms",
-    "Cookie Policy",
-    "Cookie settings",
-  ];
-
   const renderLinks = (links: string[]) =>
     links.map((link) => (
       <li key={link}>
@@ -49,9 +25,6 @@ const FooterBar = async () => {
                 HELP
               </span>
             </h4>
-            <ul className="py-2">
-              {renderLinks(helpLinks)}
-            </ul>
           </nav>
           <nav>
             <h4 className="py-2">
@@ -59,9 +32,6 @@ const FooterBar = async () => {
                 ABOUT US
               </span>
             </h4>
-            <ul className="py-2">
-              {renderLinks(aboutLinks)}
-            </ul>
           </nav>
           <nav>
             <h4 className="py-2">
@@ -69,9 +39,6 @@ const FooterBar = async () => {
                 TERMS
               </span>
             </h4>
-            <ul className="py-2">
-              {renderLinks(termsLinks)}
-            </ul>
           </nav>
           <nav>
             <h4 className="py-2">
