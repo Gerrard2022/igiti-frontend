@@ -10,7 +10,6 @@ import { Info } from "lucide-react";
 
 const CartPage = () => {
   const cart = useCart();
-console.log("CART ITEMS HERE", cart);
 
   return (
     <MountedCheck>

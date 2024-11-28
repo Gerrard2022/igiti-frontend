@@ -19,9 +19,9 @@ const SearchPage = () => {
 
   const { data, error } = useSWR(
     () => [
-      `/api/${process.env.NEXT_PUBLIC_API_URL}/products`,
+      `${process.env.NEXT_PUBLIC_API_URL}/products`,
       {
-        name:
+        name: 
           searchQuery && searchQuery.length >= 3 ? encodeURI(searchQuery) : "",
       },
     ],
