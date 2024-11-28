@@ -21,11 +21,18 @@ const Billboard: React.FC<BillboardProps> = ({
           "relative aspect-[3/1] overflow-hidden bg-cover",
           additionalProps
         )}
-        style={{ backgroundImage: `url(${data[0].imageUrl})` }}
+        style={{
+          backgroundImage: Array.isArray(data)
+            ? `url(${data[0]?.imageUrl || ''})`
+            : `url(${data?.imageUrl || ''})`,
+        }}
       >
         <div className="flex flex-col items-center justify-center w-full h-full text-center gap-y-8">
           <div className="max-w-xs text-3xl font-bold sm:text-5xl lg:text-6xl sm:max-w-xl">
-            <ColorEffect>{data[0].label}</ColorEffect>
+            <ColorEffect>{
+                  Array.isArray(data) ?
+                   data[0].label
+                  : data.label}</ColorEffect>
           </div>
         </div>
       </div>
