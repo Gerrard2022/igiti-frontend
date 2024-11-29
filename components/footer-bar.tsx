@@ -22,14 +22,14 @@ const FooterBar = async () => {
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-                HELP
+                HOME
               </span>
             </h4>
           </nav>
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-                <Link href="https://igiti.africa" 
+                <Link href="https://igiti.africa/contact" 
                  target="_blank" 
                   rel="noopener noreferrer">
                    Contact Us
@@ -40,7 +40,7 @@ const FooterBar = async () => {
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-              <Link href="https://igiti.africa" 
+              <Link href="https://igiti.africa/faq" 
                  target="_blank" 
                   rel="noopener noreferrer">
                     FAQ
@@ -51,7 +51,7 @@ const FooterBar = async () => {
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-              <Link href="https://igiti.africa" 
+              <Link href="https://igiti.africa/return-policy" 
                  target="_blank" 
                   rel="noopener noreferrer">
                    Return Policy
