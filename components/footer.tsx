@@ -11,13 +11,9 @@ const Footer = () => {
           <Image src={logo} alt="logo" height={36} width={100} />
         </Link>
         <section className="flex pr-2 md:pr-0 gap-x-6">
-          <Link href="/">
-            <Facebook color="white" size={36} />
-          </Link>
-          <Link href="/">
-            <Youtube color="white" size={36} />
-          </Link>
-          <Link href="/">
+          <Link href="https://www.instagram.com/igiti_entreprises"  
+                  target="_blank" 
+                  rel="noopener noreferrer">
             <Instagram color="white" size={36} />
           </Link>
         </section>
@@ -25,7 +21,7 @@ const Footer = () => {
       </nav>
       <section className="flex py-6">
         <p className="text-xs text-white">
-          &copy; 2023 Store4U, Repith Project. All rights reserved.
+          &copy; Copyright. All Rights Reserved
         </p>
       </section>
     </footer>

@@ -29,21 +29,33 @@ const FooterBar = async () => {
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-                ABOUT US
+                <Link href="https://igiti.africa" 
+                 target="_blank" 
+                  rel="noopener noreferrer">
+                   Contact Us
+                </Link>
               </span>
             </h4>
           </nav>
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-                TERMS
+              <Link href="https://igiti.africa" 
+                 target="_blank" 
+                  rel="noopener noreferrer">
+                    FAQ
+                </Link>
               </span>
             </h4>
           </nav>
           <nav>
             <h4 className="py-2">
               <span className="border-b-4 border-accent">
-                BUY ONLINE
+              <Link href="https://igiti.africa" 
+                 target="_blank" 
+                  rel="noopener noreferrer">
+                   Return Policy
+                </Link>
               </span>
             </h4>
             <ul className="py-2">
