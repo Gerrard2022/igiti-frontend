@@ -5,11 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import Button from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Color, Size } from "@/types";
-import ColorEffect from "@/components/ui/color-effect";
 
 interface FilterProps {
-  data: (Size | Color)[];
+  data: { name: string }[];
   name: string;
   valueKey: string;
 }
@@ -53,11 +51,9 @@ const Filter: React.FC<FilterProps> = ({ data, name, valueKey }) => {
 
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-semibold">
-        <ColorEffect>{name}</ColorEffect>
-      </h3>
+      <h3 className="text-lg font-semibold">{name}</h3>
       <hr className="my-4" />
-      <div className="flex flex-wrap gap-2 ">
+      <div className="flex flex-wrap gap-2">
         {data.map((filter) => (
           <div key={filter.name} className="flex items-center">
             <Button

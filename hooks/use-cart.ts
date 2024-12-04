@@ -2,14 +2,14 @@ import { create } from "zustand";
 import { toast } from "react-hot-toast";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { CartItem, Product, Variant } from "@/types";
+import { CartItem, Product } from "@/types";
 
 interface CartStore {
   items: CartItem[];
-  addItem: (data: Product, variant: Variant) => void;
-  removeItem: (productId: string, variantId: string) => void;
+  addItem: (data: Product) => void;
+  removeItem: (productId: string) => void;
   removeAll: () => void;
-  decreaseItem: (productId: string, variantId: string) => void;
+  decreaseItem: (productId: string) => void;
 }
 
 const useCart = create(
@@ -17,17 +17,15 @@ const useCart = create(
     (set, get) => ({
       items: [],
 
-      addItem: (product: Product, variant: Variant) => {
+      addItem: (product: Product) => {
         const currentItems = get().items;
 
         const existingItemIndex = currentItems.findIndex(
-          (currentItem) =>
-            currentItem.product.id === product.id &&
-            currentItem.variant.id === variant.id
+          (currentItem) => currentItem.product.id === product.id
         );
 
         if (existingItemIndex !== -1) {
-          if (currentItems[existingItemIndex].quantity + 1 > variant.inStock) {
+          if (currentItems[existingItemIndex].quantity + 1 > product.inStock) {
             toast.error(
               `You can't add more of ${product.name}. Not enough in stock.`
             );
@@ -46,7 +44,6 @@ const useCart = create(
               ...state.items,
               {
                 product,
-                variant,
                 quantity: 1,
               },
             ],
@@ -55,23 +52,19 @@ const useCart = create(
         }
       },
 
-      removeItem: (productId: string, variantId: string) => {
+      removeItem: (productId: string) => {
         set({
           items: [
-            ...get().items.filter(
-              (item) =>
-                item.product.id !== productId || item.variant.id !== variantId
-            ),
+            ...get().items.filter((item) => item.product.id !== productId),
           ],
         });
         toast.success("Item removed from cart.");
       },
 
-      decreaseItem: (productId: string, variantId: string) => {
+      decreaseItem: (productId: string) => {
         const currentItems = get().items;
         const existingItemIndex = currentItems.findIndex(
-          (item) =>
-            item.product.id === productId && item.variant.id === variantId
+          (item) => item.product.id === productId
         );
 
         if (existingItemIndex !== -1) {
@@ -86,8 +79,7 @@ const useCart = create(
           } else {
             set((state) => ({
               items: state.items.filter(
-                (item) =>
-                  item.product.id !== productId || item.variant.id !== variantId
+                (item) => item.product.id !== productId
               ),
             }));
             toast.success("Item removed from cart.");

@@ -33,7 +33,7 @@ const CartDialog = () => {
     <MountedCheck>
       <Button
         onClick={onOpen}
-        className="flex items-center px-5 py-3 bg-black rounded-l-none rounded-r-lg"
+        className="flex items-center px-5 py-3 bg-black rounded-sm rounded-r-lg"
       >
         <ShoppingBag size={20} color="white" />
         <span className="ml-2 text-sm font-medium text-white">

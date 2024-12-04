@@ -12,14 +12,7 @@ export interface Category {
 
 export interface CartItem {
   product: Product;
-  variant: Variant;
   quantity: number;
-}
-export interface Variant {
-  id: string;
-  colorId: string;
-  sizeId: string;
-  inStock: number;
 }
 
 export interface Product {
@@ -30,20 +23,8 @@ export interface Product {
   isFeatured: boolean;
   images: Image[];
   description: string;
-  variants: Variant[];
 }
 
-export interface Size {
-  id: string;
-  name: string;
-  value: string;
-}
-
-export interface Color {
-  id: string;
-  name: string;
-  value: string;
-}
 
 export interface Image {
   id: string;
