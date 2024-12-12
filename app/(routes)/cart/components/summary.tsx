@@ -5,15 +5,16 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-import Button from "@/components/ui/button";
 import Currency from "@/components/ui/currency";
 import useCart from "@/hooks/use-cart";
+import { Input } from "@/components/ui/input";
 
 const Summary = () => {
   const searchParams = useSearchParams();
   const items = useCart((state) => state.items);
   const removeAll = useCart((state) => state.removeAll);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({
     addressLine1: "",
     city: "",
@@ -39,16 +40,8 @@ const Summary = () => {
   }, 0);
 
   const onCheckout = async () => {
+    setIsLoading(true);
     try {
-      // Log the request body for debugging
-      console.log("Checkout Request:", {
-        products: items.map((item) => ({
-          productId: item.product.id,
-          quantity: item.quantity,
-        })),
-        shippingDetails,
-      });
-
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
         {
@@ -56,22 +49,20 @@ const Summary = () => {
             productId: item.product.id,
             quantity: item.quantity,
           })),
-          shippingDetails, // Include shipping details
+          shippingDetails,
         }
       );
-
-      // Redirect to the payment URL
       window.location.href = response.data.url;
     } catch (error: any) {
-      // Improved error handling
       console.error("Checkout Error:", error);
       toast.error(error?.response?.data?.error || "An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="px-4 py-6 mt-16 rounded-lg bg-gray-50 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-      {/* Order summary */}
       <h2 className="text-lg font-medium text-gray-900">Order summary</h2>
       <div className="mt-6">
         {items.map((item) => (
@@ -83,7 +74,6 @@ const Summary = () => {
               <span className="font-semibold">{item.product.name}</span>
               <div className="text-xs">(x{item.quantity})</div>
             </div>
-
             <Currency
               className={["font-light", "text-sm"]}
               value={item.product.price * item.quantity}
@@ -96,12 +86,10 @@ const Summary = () => {
         </div>
       </div>
       <div className="mt-4">
-        {/* Form for Shipping Details */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Address Line 1</label>
-          <input
+          <Input
             type="text"
-            className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             value={shippingDetails.addressLine1}
             onChange={(e) =>
               setShippingDetails({ ...shippingDetails, addressLine1: e.target.value })
@@ -111,29 +99,30 @@ const Summary = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">City</label>
-            <input
+            <Input
               type="text"
-              className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               value={shippingDetails.city}
-              onChange={(e) => setShippingDetails({ ...shippingDetails, city: e.target.value })}
+              onChange={(e) =>
+                setShippingDetails({ ...shippingDetails, city: e.target.value })
+              }
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">State</label>
-            <input
+            <Input
               type="text"
-              className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               value={shippingDetails.state}
-              onChange={(e) => setShippingDetails({ ...shippingDetails, state: e.target.value })}
+              onChange={(e) =>
+                setShippingDetails({ ...shippingDetails, state: e.target.value })
+              }
             />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Zip Code</label>
-            <input
+            <Input
               type="text"
-              className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               value={shippingDetails.zipCode}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, zipCode: e.target.value })
@@ -142,9 +131,8 @@ const Summary = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Country</label>
-            <input
+            <Input
               type="text"
-              className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               value={shippingDetails.country}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, country: e.target.value })
@@ -154,9 +142,8 @@ const Summary = () => {
         </div>
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-          <input
+          <Input
             type="text"
-            className="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             value={shippingDetails.phoneNumber}
             onChange={(e) =>
               setShippingDetails({ ...shippingDetails, phoneNumber: e.target.value })
@@ -164,13 +151,24 @@ const Summary = () => {
           />
         </div>
       </div>
-      <Button
+      <button
         onClick={onCheckout}
-        disabled={items.length === 0}
-        className="w-full mt-6"
+        disabled={isLoading || items.length === 0}
+        className={`w-full mt-6 px-4 py-2 rounded-md font-medium text-white ${
+          isLoading || items.length === 0
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-black hover:bg-gray-800"
+        }`}
       >
-        Checkout
-      </Button>
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Processing...
+          </div>
+        ) : (
+          "Checkout"
+        )}
+      </button>
     </div>
   );
 };
