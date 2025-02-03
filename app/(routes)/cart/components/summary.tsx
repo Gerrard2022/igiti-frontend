@@ -25,13 +25,29 @@ const Summary = () => {
   });
 
   useEffect(() => {
-    if (searchParams.get("success")) {
-      toast.success("Payment completed.");
-      removeAll();
-    }
+    const orderTrackingId = searchParams.get("OrderTrackingId");
+    const orderMerchantReference = searchParams.get("OrderMerchantReference");
+    
+    if (orderTrackingId && orderMerchantReference) {
+      // Verify payment status
+      const verifyPayment = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/verify-payment?orderTrackingId=${orderTrackingId}`
+          );
+          
+          if (response.data.success) {
+            toast.success("Payment completed.");
+            removeAll();
+          } else {
+            toast.error("Payment verification failed.");
+          }
+        } catch (error) {
+          toast.error("Something went wrong with payment verification.");
+        }
+      };
 
-    if (searchParams.get("canceled")) {
-      toast.error("Something went wrong.");
+      verifyPayment();
     }
   }, [searchParams, removeAll]);
 
@@ -52,7 +68,12 @@ const Summary = () => {
           shippingDetails,
         }
       );
-      window.location.href = response.data.url;
+      
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        throw new Error("No payment URL received");
+      }
     } catch (error: any) {
       console.error("Checkout Error:", error);
       toast.error(error?.response?.data?.error || "An unexpected error occurred.");
