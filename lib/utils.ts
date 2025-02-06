@@ -1,11 +1,11 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
- 
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export const formatter = new Intl.NumberFormat("en-Us", {
+export const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
@@ -19,8 +19,11 @@ export const getLocationFormatter = async () => {
     return {
       format: (value: number) => {
         if (isAfrica) {
-          return `${(value * 1000).toLocaleString()} RWF`;
+          // Format RWF without currency symbol, then add RWF at the end
+          const rwfValue = value * 1000;
+          return `${rwfValue.toLocaleString('en-RW')} RWF`;
         } else {
+          // Format USD with currency symbol
           return new Intl.NumberFormat("en-US", {
             style: "currency",
             currency: "USD",
