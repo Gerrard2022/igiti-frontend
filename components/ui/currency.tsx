@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MountedCheck } from "@/lib/mounted-check";
-import { cn, formatter } from "@/lib/utils";
+import { cn, getLocationFormatter } from "@/lib/utils";
 
 interface CurrencyProps {
   value?: string | number;
@@ -9,10 +10,21 @@ interface CurrencyProps {
 }
 
 const Currency: React.FC<CurrencyProps> = ({ value, className }) => {
+  const [formattedValue, setFormattedValue] = useState("");
+
+  useEffect(() => {
+    const formatPrice = async () => {
+      const formatter = await getLocationFormatter();
+      setFormattedValue(formatter.format(Number(value)));
+    };
+    
+    formatPrice();
+  }, [value]);
+
   return (
     <MountedCheck>
       <span className={cn("font-semibold", ...(className || []))}>
-        {formatter.format(Number(value))}
+        {formattedValue}
       </span>
     </MountedCheck>
   );
