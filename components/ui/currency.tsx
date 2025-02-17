@@ -7,18 +7,19 @@ import { cn } from "@/lib/utils";
 interface CurrencyProps {
   value?: string | number;
   className?: string[];
+  onCountryDetect?: (country: string) => void;
 }
 
-const Currency: React.FC<CurrencyProps> = ({ value, className }) => {
+const Currency: React.FC<CurrencyProps> = ({ value, className, onCountryDetect }) => {
   const [formattedValue, setFormattedValue] = useState("");
   const [location, setLocation] = useState<string>("unknown");
 
   useEffect(() => {
-    const formatPrice = async () => {
+    const detectLocation = async () => {
       try {
         // Try to get user's country using the native Geolocation API
         if ("geolocation" in navigator) {
-          const position = await new Promise((resolve, reject) => {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject);
           });
           
@@ -28,12 +29,20 @@ const Currency: React.FC<CurrencyProps> = ({ value, className }) => {
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
           const data = await response.json();
-          const country = data.address.country;
-          setLocation(country || "unknown");
+          const country = data.address.country || "unknown";
+          
+          setLocation(country);
           
           // Check if in Africa (you can expand this list)
-          const africanCountries = ["Rwanda", "Kenya", "Uganda", "Tanzania", "Burundi"];
-          const isAfrica = africanCountries.includes(country);
+          const africanCountries = [
+            "Rwanda", "Kenya", "Uganda", "Tanzania", "Burundi", 
+            "Nigeria", "South Africa", "Egypt", "Algeria", "Morocco",
+            "Ethiopia", "Ghana", "Angola", "Mozambique"
+          ];
+          
+          const isAfrica = africanCountries.some(africanCountry => 
+            country.toLowerCase().includes(africanCountry.toLowerCase())
+          );
           
           // Format the price
           const numericValue = Number(value);
@@ -48,6 +57,14 @@ const Currency: React.FC<CurrencyProps> = ({ value, className }) => {
               }).format(numericValue)
             );
           }
+
+          // Call the callback if provided
+          if (onCountryDetect) {
+            onCountryDetect(country);
+          }
+
+          console.log("Detected location:", country);
+          console.log("Is Africa:", isAfrica);
         } else {
           // Fallback to USD if geolocation is not available
           setFormattedValue(
@@ -69,8 +86,12 @@ const Currency: React.FC<CurrencyProps> = ({ value, className }) => {
       }
     };
 
-    formatPrice();
-  }, [value]);
+    detectLocation();
+  }, [value, onCountryDetect]);
+
+  console.log("Current location:", location);
+  console.log("Formatted price:", formattedValue);
+  console.log("Original value:", value);
 
   return (
     <MountedCheck>
