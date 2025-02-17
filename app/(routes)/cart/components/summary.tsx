@@ -23,6 +23,7 @@ const Summary = () => {
     country: "",
     phoneNumber: "",
   });
+  const [location, setLocation] = useState("Rwanda");
 
   useEffect(() => {
     const orderTrackingId = searchParams.get("OrderTrackingId");
@@ -33,7 +34,7 @@ const Summary = () => {
       const verifyPayment = async () => {
         try {
           const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/verify-payment?orderTrackingId=${orderTrackingId}`
+           ` ${process.env.NEXT_PUBLIC_API_URL}/verify-payment?orderTrackingId=${orderTrackingId}`
           );
           
           if (response.data.success) {
@@ -49,6 +50,30 @@ const Summary = () => {
 
       verifyPayment();
     }
+
+    // Try to get user's location
+    const getLocation = async () => {
+      try {
+        if ("geolocation" in navigator) {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+           ` https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          if (data.address?.country) {
+            setLocation(data.address.country);
+          }
+        }
+      } catch (error) {
+        console.error("Error getting location:", error);
+      }
+    };
+
+    getLocation();
   }, [searchParams, removeAll]);
 
   const totalPrice = items.reduce((total, item) => {
@@ -66,6 +91,7 @@ const Summary = () => {
             quantity: item.quantity,
           })),
           shippingDetails,
+          location,
         }
       );
       
