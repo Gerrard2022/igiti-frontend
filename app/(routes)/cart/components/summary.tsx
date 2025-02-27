@@ -15,7 +15,6 @@ const Summary = () => {
   const removeAll = useCart((state) => state.removeAll);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [detectedLocation, setDetectedLocation] = useState("Rwanda");
   const [shippingDetails, setShippingDetails] = useState({
     addressLine1: "",
     city: "",
@@ -24,59 +23,73 @@ const Summary = () => {
     country: "",
     phoneNumber: "",
   });
+  const [location, setLocation] = useState("Rwanda");
 
   useEffect(() => {
-    const orderTrackingId = searchParams.get("OrderTrackingId");
-    const orderMerchantReference = searchParams.get("OrderMerchantReference");
+    const status = searchParams.get("status");
+    const orderId = searchParams.get("orderId");
     
-    if (orderTrackingId && orderMerchantReference) {
-      const verifyPayment = async () => {
+    if (orderId && (status === 'success' || status === 'canceled')) {
+      const checkPaymentStatus = async () => {
         try {
+          setIsLoading(true);
           const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/verify-payment?orderTrackingId=${orderTrackingId}`
+            `${process.env.NEXT_PUBLIC_API_URL}/checkout?orderId=${orderId}&status=${status}`
           );
           
-          if (response.data.success) {
-            toast.success("Payment completed.");
+          if (response.data.isPaid) {
+            toast.success("Payment completed successfully!");
             removeAll();
+          } else if (status === 'canceled') {
+            toast.error("Payment was cancelled.");
+          } else if (response.data.status === 'FAILED') {
+            toast.error("Payment failed. Please try again.");
           } else {
-            toast.error("Payment verification failed.");
+            toast.loading("Processing payment...");
           }
+
+          console.log('Payment status response:', response.data);
         } catch (error) {
-          toast.error("Something went wrong with payment verification.");
+          console.error('Error checking payment status:', error);
+          toast.error("Failed to verify payment status");
+        } finally {
+          setIsLoading(false);
         }
       };
 
-      verifyPayment();
+      checkPaymentStatus();
     }
+
+    // Try to get user's location
+    const getLocation = async () => {
+      try {
+        if ("geolocation" in navigator) {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          if (data.address?.country) {
+            setLocation(data.address.country);
+          }
+        }
+      } catch (error) {
+        console.error("Error getting location:", error);
+      }
+    };
+
+    getLocation();
   }, [searchParams, removeAll]);
 
   const totalPrice = items.reduce((total, item) => {
     return total + Number(item.product.price) * item.quantity;
   }, 0);
 
-  const handleCountryDetect = (country: string) => {
-    setDetectedLocation(country);
-  };
-
-  const validateForm = () => {
-    const requiredFields = ['addressLine1', 'city', 'state', 'zipCode', 'country', 'phoneNumber'];
-    const emptyFields = requiredFields.filter(field => !shippingDetails[field]);
-    
-    if (emptyFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${emptyFields.join(', ')}`);
-      return false;
-    }
-    return true;
-  };
-
-  const onCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+  const onCheckout = async () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
@@ -87,7 +100,7 @@ const Summary = () => {
             quantity: item.quantity,
           })),
           shippingDetails,
-          location: detectedLocation,
+          location,
         }
       );
       
@@ -105,7 +118,7 @@ const Summary = () => {
   };
 
   return (
-    <form onSubmit={onCheckout} className="px-4 py-6 mt-16 rounded-lg bg-gray-50 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
+    <div className="px-4 py-6 mt-16 rounded-lg bg-gray-50 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
       <h2 className="text-lg font-medium text-gray-900">Order summary</h2>
       <div className="mt-6">
         {items.map((item) => (
@@ -120,26 +133,19 @@ const Summary = () => {
             <Currency
               className={["font-light", "text-sm"]}
               value={item.product.price * item.quantity}
-              onCountryDetect={handleCountryDetect}
             />
           </div>
         ))}
         <div className="flex items-center justify-between pt-4 border-t border-gray-200">
           <div className="text-base font-medium text-gray-900">Order total</div>
-          <Currency 
-            value={totalPrice} 
-            onCountryDetect={handleCountryDetect}
-          />
+          <Currency value={totalPrice} />
         </div>
       </div>
       <div className="mt-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Address Line 1 <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Address Line 1</label>
           <Input
             type="text"
-            required
             value={shippingDetails.addressLine1}
             onChange={(e) =>
               setShippingDetails({ ...shippingDetails, addressLine1: e.target.value })
@@ -148,12 +154,9 @@ const Summary = () => {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              City <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700">City</label>
             <Input
               type="text"
-              required
               value={shippingDetails.city}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, city: e.target.value })
@@ -161,12 +164,9 @@ const Summary = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              State <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700">State</label>
             <Input
               type="text"
-              required
               value={shippingDetails.state}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, state: e.target.value })
@@ -176,12 +176,9 @@ const Summary = () => {
         </div>
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Zip Code <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Zip Code</label>
             <Input
               type="text"
-              required
               value={shippingDetails.zipCode}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, zipCode: e.target.value })
@@ -189,12 +186,9 @@ const Summary = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Country <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Country</label>
             <Input
               type="text"
-              required
               value={shippingDetails.country}
               onChange={(e) =>
                 setShippingDetails({ ...shippingDetails, country: e.target.value })
@@ -203,12 +197,9 @@ const Summary = () => {
           </div>
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Phone Number <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Phone Number</label>
           <Input
-            type="tel"
-            required
+            type="text"
             value={shippingDetails.phoneNumber}
             onChange={(e) =>
               setShippingDetails({ ...shippingDetails, phoneNumber: e.target.value })
@@ -217,7 +208,7 @@ const Summary = () => {
         </div>
       </div>
       <button
-        type="submit"
+        onClick={onCheckout}
         disabled={isLoading || items.length === 0}
         className={`w-full mt-6 px-4 py-2 rounded-md font-medium text-white ${
           isLoading || items.length === 0
@@ -234,7 +225,7 @@ const Summary = () => {
           "Checkout"
         )}
       </button>
-    </form>
+    </div>
   );
 };
 
