@@ -90,6 +90,17 @@ const Summary = () => {
   }, 0);
 
   const onCheckout = async () => {
+    // Add validation check
+    if (!shippingDetails.addressLine1 || 
+        !shippingDetails.city || 
+        !shippingDetails.state || 
+        !shippingDetails.zipCode || 
+        !shippingDetails.country || 
+        !shippingDetails.phoneNumber) {
+      toast.error("Please fill in all shipping details");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await axios.post(
@@ -143,8 +154,11 @@ const Summary = () => {
       </div>
       <div className="mt-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Address Line 1</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Address Line 1 <span className="text-red-500">*</span>
+          </label>
           <Input
+            required
             type="text"
             value={shippingDetails.addressLine1}
             onChange={(e) =>
@@ -154,8 +168,11 @@ const Summary = () => {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">City</label>
+            <label className="block text-sm font-medium text-gray-700">
+              City <span className="text-red-500">*</span>
+            </label>
             <Input
+              required
               type="text"
               value={shippingDetails.city}
               onChange={(e) =>
@@ -164,8 +181,11 @@ const Summary = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">State</label>
+            <label className="block text-sm font-medium text-gray-700">
+              State <span className="text-red-500">*</span>
+            </label>
             <Input
+              required
               type="text"
               value={shippingDetails.state}
               onChange={(e) =>
@@ -176,8 +196,11 @@ const Summary = () => {
         </div>
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Zip Code</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Zip Code <span className="text-red-500">*</span>
+            </label>
             <Input
+              required
               type="text"
               value={shippingDetails.zipCode}
               onChange={(e) =>
@@ -186,8 +209,11 @@ const Summary = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Country</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Country <span className="text-red-500">*</span>
+            </label>
             <Input
+              required
               type="text"
               value={shippingDetails.country}
               onChange={(e) =>
@@ -197,8 +223,11 @@ const Summary = () => {
           </div>
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Phone Number <span className="text-red-500">*</span>
+          </label>
           <Input
+            required
             type="text"
             value={shippingDetails.phoneNumber}
             onChange={(e) =>
